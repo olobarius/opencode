@@ -249,6 +249,8 @@ import type {
   ExperimentalMediaGetOutput,
   ExperimentalBlobGetInput,
   ExperimentalBlobGetOutput,
+  ExperimentalPluginWebInput,
+  ExperimentalPluginWebOutput,
   ExperimentalAutomationCreateInput,
   ExperimentalAutomationCreateOutput,
   ExperimentalAutomationListInput,
@@ -1556,6 +1558,20 @@ export function make(options: ClientOptions) {
               declaredStatuses: [400, 401, 404],
               empty: false,
               binary: true,
+            },
+            requestOptions,
+          ),
+      },
+      plugin: {
+        web: (input?: ExperimentalPluginWebInput, requestOptions?: RequestOptions) =>
+          request<ExperimentalPluginWebOutput>(
+            {
+              method: "GET",
+              path: `/api/experimental/plugin/web`,
+              query: { location: input?.["location"] },
+              successStatus: 200,
+              declaredStatuses: [400, 401, 404, 503],
+              empty: false,
             },
             requestOptions,
           ),

@@ -22,6 +22,7 @@ import { makeBlobGet } from "./blob"
 import { makeAutomation } from "./automation"
 import { makeJob } from "./job"
 import { makeMediaGet } from "./media"
+import { makePluginWeb } from "./plugin-web"
 import { type Outbound, runPtySocket } from "./pty-socket"
 
 export const PersistentPtyHandler = HttpApiBuilder.group(Api, "server.experimental", (handlers) =>
@@ -33,11 +34,13 @@ export const PersistentPtyHandler = HttpApiBuilder.group(Api, "server.experiment
     const job = yield* makeJob
     const mediaGet = yield* makeMediaGet
     const blobGet = yield* makeBlobGet
+    const pluginWeb = yield* makePluginWeb
     const automation = yield* makeAutomation
 
     return handlers
       .handleRaw("media.get", (ctx) => mediaGet(ctx.params.hash, ctx.request))
       .handleRaw("blob.get", (ctx) => blobGet(ctx.params.id, ctx.request))
+      .handle("plugin.web", (ctx) => pluginWeb(ctx.request))
       .handle("job.list", (ctx) => job.list(ctx.query))
       .handle("artifacts.providers", (ctx) => artifact.providers(ctx.query, ctx.request))
       .handle("artifacts.list", (ctx) => artifact.list(ctx.query, ctx.request))
