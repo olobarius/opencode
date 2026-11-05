@@ -247,6 +247,8 @@ import type {
   ExperimentalPersistentPtyRemoveOutput,
   ExperimentalPersistentPtyConnectTokenInput,
   ExperimentalPersistentPtyConnectTokenOutput,
+  ExperimentalPluginWebInput,
+  ExperimentalPluginWebOutput,
   ExperimentalAutomationCreateInput,
   ExperimentalAutomationCreateOutput,
   ExperimentalAutomationListInput,
@@ -1641,6 +1643,11 @@ const EndpointExperimentalPersistentPtyConnectToken =
       ),
     )
 
+const EndpointExperimentalPluginWeb = (raw: RawClient["server.experimental"]) => (input?: ExperimentalPluginWebInput) =>
+  preserveEffect<ExperimentalPluginWebOutput>()(
+    raw["plugin.web"]({ query: { location: input?.["location"] } }).pipe(Effect.mapError(mapClientError)),
+  )
+
 const EndpointExperimentalAutomationCreate =
   (raw: RawClient["server.experimental"]) => (input: ExperimentalAutomationCreateInput) =>
     preserveEffect<ExperimentalAutomationCreateOutput>()(
@@ -1908,6 +1915,7 @@ const adaptGroupExperimental = (raw: RawClient["server.experimental"]) => ({
     remove: EndpointExperimentalPersistentPtyRemove(raw),
     connectToken: EndpointExperimentalPersistentPtyConnectToken(raw),
   },
+  plugin: { web: EndpointExperimentalPluginWeb(raw) },
   automation: {
     create: EndpointExperimentalAutomationCreate(raw),
     list: EndpointExperimentalAutomationList(raw),

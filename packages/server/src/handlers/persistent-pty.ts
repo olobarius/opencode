@@ -23,6 +23,7 @@ import { makeAutomation } from "./automation"
 import { makeJob } from "./job"
 import { makeMachine, makeMachineLink } from "./machine"
 import { makeMediaGet } from "./media"
+import { makePluginWeb } from "./plugin-web"
 import { makePush } from "./push"
 import { type Outbound, runPtySocket } from "./pty-socket"
 
@@ -35,6 +36,7 @@ export const PersistentPtyHandler = HttpApiBuilder.group(Api, "server.experiment
     const job = yield* makeJob
     const mediaGet = yield* makeMediaGet
     const blobGet = yield* makeBlobGet
+    const pluginWeb = yield* makePluginWeb
     const automation = yield* makeAutomation
     const machine = yield* makeMachine
     const machineLink = yield* makeMachineLink
@@ -43,6 +45,7 @@ export const PersistentPtyHandler = HttpApiBuilder.group(Api, "server.experiment
     return handlers
       .handleRaw("media.get", (ctx) => mediaGet(ctx.params.hash, ctx.request))
       .handleRaw("blob.get", (ctx) => blobGet(ctx.params.id, ctx.request))
+      .handle("plugin.web", (ctx) => pluginWeb(ctx.request))
       .handle("job.list", (ctx) => job.list(ctx.query))
       .handle("job.cancel", (ctx) => job.cancel(ctx.params.id))
       .handleRaw("machine.link", (ctx) => machineLink(ctx.request))
