@@ -16,9 +16,9 @@ import { createContext, useContext } from "solid-js"
 
 const HostApisContext = createContext<HostApis>()
 
-// Desktop only: a window loads the plugin GUIs main sends.
+// A desktop window loads the plugin GUIs main sends; a web tab, without a bridge, those its own server allows.
 const PluginsContext = createContext<{
-  bridge: Bridge
+  bridge: Bridge | undefined
   set: (plugins: readonly PluginGui[], reserved: readonly string[]) => void
   reserved: () => readonly string[]
 }>()
@@ -90,15 +90,17 @@ export function PluginRoot(props: ParentProps) {
     <HostApisContext.Provider value={apis}>
       <PluginsContext.Provider
         value={
-          bridge && {
-            bridge,
-            set: (next, ids) =>
-              batch(() => {
-                setPlugins(next)
-                setReserved(ids)
-              }),
-            reserved,
-          }
+          bridge || platform.platform === "web"
+            ? {
+                bridge,
+                set: (next, ids) =>
+                  batch(() => {
+                    setPlugins(next)
+                    setReserved(ids)
+                  }),
+                reserved,
+              }
+            : undefined
         }
       >
         <PluginHostProvider

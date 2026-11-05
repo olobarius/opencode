@@ -540,6 +540,15 @@ function normalizeExperimental(
         )
         if (value !== undefined) result.location_idle_timeout = value
       }
+      if (own(experimental, "plugin_gui_web")) {
+        const value = decodeEncoded(
+          ConfigExperimental.Info.fields.plugin_gui_web,
+          experimental.plugin_gui_web,
+          ["experimental", "plugin_gui_web"],
+          diagnostics,
+        )
+        if (value !== undefined) result.plugin_gui_web = value
+      }
     }
   }
   if (Object.keys(result).length || (isRecord(input.experimental) && !Object.keys(input.experimental).length))
