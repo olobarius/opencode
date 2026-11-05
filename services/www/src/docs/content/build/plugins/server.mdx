@@ -1376,7 +1376,9 @@ await ctx.session.hook("prompt", (event) => {
 The hook receives an owned, mutable draft:
 
 - `prompt` contains `text`, `files`, agent mentions in `agents`, and selected `skills`.
-- `metadata` contains application-defined admission metadata.
+- `metadata` contains application-defined admission metadata. Prompts from the desktop app, the web app, and the TUI
+  carry `metadata.client`, which names the sender: `{ kind: "desktop" | "web" | "tui", id }`, where `id` is the
+  desktop window, browser tab, or TUI process.
 - `delivery` is `"steer"` by default and can be changed to `"queue"`.
 - Session and message IDs are readonly; a hook cannot redirect admission.
 

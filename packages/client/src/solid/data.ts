@@ -87,7 +87,15 @@ export type CreateDataInput = {
    * render tool-result files: a session full of screenshots otherwise keeps hundreds of MB of base64 alive.
    */
   readonly omitToolFileData?: boolean
+  /**
+   * The client that sends this data's prompts, stored as `metadata.client` on each user message so plugins can tell
+   * where a prompt came from. A prompt whose metadata already names a client, such as a re-sent queued one, keeps it.
+   */
+  readonly client?: () => DataClient
 }
+
+/** Where a prompt was sent from: the kind of client and, when it has one, the window or device. */
+export type DataClient = { readonly kind: "desktop" | "web" | "tui"; readonly id?: string }
 
 const messagePageLimit = 20
 // Trailing window for event bursts that each ask for the same refetch.
@@ -1737,7 +1745,8 @@ export function createData(config: CreateDataInput) {
       // idempotent per ID, so retrying with the identical payload cannot
       // double-admit.
       prompt(input: SessionPromptInput & { gate?: Promise<unknown>; prepare?: () => Promise<unknown> }) {
-        const { gate, prepare, ...request } = input
+        const { gate, prepare, ...rest } = input
+        const request = config.client ? { ...rest, metadata: { client: config.client(), ...rest.metadata } } : rest
         const id = request.id ?? SessionMessage.ID.create()
         // A retry may reuse an ID that is already rendered — and possibly
         // already durable. Admit optimistically only for new IDs so a failed
