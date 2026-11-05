@@ -18,6 +18,7 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
       event: client.event,
       connection: client.connection,
       directory: props.directory,
+      client: () => ({ kind: "tui", id: String(process.pid) }),
     })
     data satisfies Plugin.Context["data"]
     const [generatingTitles, setGeneratingTitles] = createStore<Record<string, boolean | undefined>>({})

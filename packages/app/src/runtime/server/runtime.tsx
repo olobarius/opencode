@@ -40,6 +40,8 @@ import { ModelState } from "./persistence"
 import { useLanguage } from "@/runtime/i18n/language"
 import { showToast } from "@/shell/notifications/toast"
 import { formatServerError } from "./errors"
+import { usePlatform } from "@/runtime/platform/platform"
+import { uuid } from "@opencode/util/uuid"
 import { useSettings } from "@/settings/model"
 import { timelinePreset } from "@opencode/session-ui/timeline/detail"
 import type { SessionInfo } from "@opencode/client/promise"
@@ -192,6 +194,9 @@ function createGlobalModels() {
   }
 }
 
+// Names this browser tab in each prompt's `metadata.client`; a desktop window uses its own window ID.
+const tabID = uuid()
+
 function createServerController(
   conn: ServerConnection.Any,
   scope: ServerScope,
@@ -203,11 +208,14 @@ function createServerController(
   const settings = useSettings()
   const tabs = useTabs()
   const currentRoute = useCurrentRoute()
+  const platform = usePlatform()
   const connKey = ServerConnection.key(conn)
   const sdk = createServerSdkContext(conn, scope)
+  const client = { kind: platform.platform, id: platform.platform === "desktop" ? platform.windowID : tabID }
 
   const source = createData({
     api: () => sdk.api,
+    client: () => client,
     initialMessageLimit: () => (timelinePreset(settings.general.timelineDetail())?.id === "compact" ? 40 : 20),
     event: {
       on: sdk.event.on,
