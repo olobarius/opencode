@@ -24,6 +24,7 @@ export const { use: useData, provider: DataProvider } = createSimpleContext({
       // Live tool events carry screenshots as inline base64, which open tabs would otherwise hold for the whole run.
       // Read per event, so toggling previews applies to new results without a restart.
       omitToolFileData: () => !config.data.session?.image_preview,
+      client: () => ({ kind: "tui", id: String(process.pid) }),
     })
     // Turning previews on brings back the screenshots dropped while they were off.
     createEffect(
