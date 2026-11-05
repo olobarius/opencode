@@ -52,6 +52,50 @@ test("uses the configured initial window and retains normal cursor page sizes", 
   }
 })
 
+test("tags each prompt with the sending client unless its metadata already names one", async () => {
+  const sent: unknown[] = []
+  const api = OpenCode.make({
+    baseUrl: "http://opencode.local",
+    fetch: async (input, init) => {
+      const body = await (input instanceof Request ? input : new Request(input, init)).json()
+      sent.push(body.metadata)
+      return Response.json({
+        data: {
+          id: body.id,
+          sessionID: "ses_prompt",
+          time: { created: 1 },
+          type: "user",
+          delivery: "steer",
+          payload: {},
+        },
+      })
+    },
+  })
+  const setup = createRoot((dispose) => ({
+    data: createData({
+      api: () => api,
+      directory: "/project",
+      event: { on: () => () => {}, listen: () => () => {} },
+      client: () => ({ kind: "web", id: "tab_1" }),
+    }),
+    dispose,
+  }))
+  try {
+    await setup.data.session.prompt({ sessionID: "ses_prompt", text: "Hello", metadata: { agent: "build" } })
+    await setup.data.session.prompt({
+      sessionID: "ses_prompt",
+      text: "Queued earlier",
+      metadata: { client: { kind: "desktop", id: "window_1" } },
+    })
+    expect(sent).toEqual([
+      { client: { kind: "web", id: "tab_1" }, agent: "build" },
+      { client: { kind: "desktop", id: "window_1" } },
+    ])
+  } finally {
+    setup.dispose()
+  }
+})
+
 test("counts every subagent page in a root session's cost", async () => {
   const child = (index: number): SessionInfo => ({
     ...session(0),
