@@ -39,13 +39,16 @@ const writers = [
 
 const illustrators = ["usrnk1", "ludvigrask_", "arvsrn", "iamdavidhill"] as const
 
+// Fork build (not upstream): names the patch set, so the About page shows at a glance that this app is patched.
+const patch = "+webgui (olobarius/opencode)"
+
 export function SettingsAbout(props: { active: boolean }) {
   const language = useLanguage()
   const platform = usePlatform()
   const dialog = useDialog()
   const [copyState, setCopyState] = createSignal(INITIAL_ABOUT_COPY_STATE)
   const copy = createMemo(() => selectAboutCopyView(copyState()))
-  const version = () => platform.version ?? language.t("settings.about.devVersion")
+  const version = () => `${platform.version ?? language.t("settings.about.devVersion")}${patch}`
   const versionLabel = () => language.t("settings.about.version", { version: version() })
   let copyTimer: ReturnType<typeof setTimeout> | undefined
 
